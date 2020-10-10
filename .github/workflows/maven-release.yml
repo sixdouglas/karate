@@ -26,7 +26,7 @@ jobs:
       - name: Generate Maven settings.xml file
         uses: s4u/maven-settings-action@v2.1.1
         with:
-          servers: '[{"id": "ossrh", "username": "${{ secrets.serverUsername }}", "password": "${{ secrets.serverPassword }}"}]'
+          servers: '[{"id": "ossrh", "username": "${{ secrets.serverUsername }}", "password": "${{ secrets.serverPassword }}"},{"id": "gpg.passphrase", "passphrase": "${{ secrets.gpg_passphrase }}"}]'
           sonatypeSnapshots: true
           override: false
       - name: Set release version
