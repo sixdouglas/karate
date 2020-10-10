@@ -28,7 +28,8 @@ jobs:
         with:
           servers: '[{"id": "ossrh", "username": "${{ secrets.serverUsername }}", "password": "${{ secrets.serverPassword }}"},{"id": "gpg.passphrase", "passphrase": "${{ secrets.gpg_passphrase }}"}]'
           sonatypeSnapshots: true
-          override: false
+          githubServer: true
+          override: true
       - name: Set release version
         run: |
           mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${{ github.event.inputs.newMasterVersion }}
@@ -49,6 +50,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Apply Maven Release automatic changes for version ${{ github.event.inputs.newMasterVersion }}
+          file_pattern: *.md **/pom.xml **/build.gradle
           commit_user_name: ptrthomas
           commit_user_email: peter_thomas@intuit.com
           commit_author: Peter Thomas <peter_thomas@intuit.com>
