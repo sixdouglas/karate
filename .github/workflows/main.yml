@@ -1,0 +1,80 @@
+name: Make the release
+on:
+  workflow_dispatch:
+    inputs:
+      newMasterVersion:
+        description: 'The new version to set in master branch'
+        required: true
+jobs:
+  maven-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install xmlstarlet
+        run: sudo apt install xmlstarlet
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          ref : master
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - name: Generate Maven settings.xml file
+        uses: s4u/maven-settings-action@v2.1.1
+        with:
+          servers: '[{"id": "ossrh", "username": "${{ secrets.serverUsername }}", "password": "${{ secrets.serverPassword }}"}]'
+          sonatypeSnapshots: true
+      - name: Set release version
+        run: |
+          mvn versions:set -DnewVersion=${{ github.event.inputs.newMasterVersion }}
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/jobserver/pom.xml
+          sed -i "" "s/karateVersion = '.*'/karateVersion = '${{ github.event.inputs.newMasterVersion }}'/" examples/jobserver/build.gradle
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/gatling/pom.xml
+          sed -i "" "s/karateVersion = '.*'/karateVersion = '${{ github.event.inputs.newMasterVersion }}'/" examples/gatling/build.gradle
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/consumer-driven-contracts/pom.xml
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/mobile-test/pom.xml
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/mock-servlet/pom.xml
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/robot-test/pom.xml
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/ui-test/pom.xml
+          xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} karate-archetype/src/main/resources/archetype-resources/pom.xml
+          mvn versions:commit
+      - name: Main packages Maven deploy
+        run: mvn clean deploy -P pre-release,release
+      - name: Netty deploy
+        run: |
+          cd karate-netty
+          mvn install -P fatjar
+          cd ..
+      - name: Robot deploy
+        run: |
+          cd karate-robot
+          mvn install -P fatjar
+          cd ..
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.newMasterVersion }}
+          release_name: Release ${{ github.event.inputs.newMasterVersion }}
+          draft: false
+          prerelease: false
+      - name: Upload Netty Release Asset
+        id: upload-netty-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./karate-netty/karate-netty-${{ github.event.inputs.newMasterVersion }}.zip
+          asset_name: karate-${{ github.event.inputs.newMasterVersion }}.zip
+      - name: Upload Robot Release Asset
+        id: upload-robot-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./karate-robot/karate-robot-${{ github.event.inputs.newMasterVersion }}.jar
+          asset_name: karate-robot-${{ github.event.inputs.newMasterVersion }}.jar
