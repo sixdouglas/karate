@@ -56,7 +56,7 @@
             commit_user_email: peter_thomas@intuit.com
             commit_author: Peter Thomas <peter_thomas@intuit.com>
         - name: Main packages Maven deploy
-          run: mvn $MAVEN_CLI_OPTS clean deploy -P pre-release,release -Dgpg.skip
+          run: mvn $MAVEN_CLI_OPTS clean package -P pre-release,release -Dgpg.skip
         - name: Netty deploy
           run: |
             cd karate-netty
