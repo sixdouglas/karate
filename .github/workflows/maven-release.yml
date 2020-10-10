@@ -26,7 +26,7 @@ jobs:
       - name: Generate Maven settings.xml file
         uses: s4u/maven-settings-action@v2.1.1
         with:
-          servers: '[{"id": "ossrh", "username": "${{ secrets.serverUsername }}", "password": "${{ secrets.serverPassword }}"},{"id": "gpg.passphrase", "passphrase": "${{ secrets.gpg_passphrase }}"}]'
+          servers: '[{"id": "ossrh", "username": "${{ secrets.SERVERUSERNAME }}", "password": "${{ secrets.SERVERPASSWORD }}"}]'
           sonatypeSnapshots: true
           githubServer: true
           override: true
@@ -55,7 +55,7 @@ jobs:
           commit_user_email: peter_thomas@intuit.com
           commit_author: Peter Thomas <peter_thomas@intuit.com>
       - name: Main packages Maven deploy
-        run: mvn $MAVEN_CLI_OPTS clean deploy -P pre-release,release
+        run: mvn $MAVEN_CLI_OPTS clean deploy -P pre-release,release  -Darguments=-Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
       - name: Netty deploy
         run: |
           cd karate-netty
