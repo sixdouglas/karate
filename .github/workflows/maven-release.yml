@@ -42,7 +42,8 @@ jobs:
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/robot-test/pom.xml
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/ui-test/pom.xml
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} karate-archetype/src/main/resources/archetype-resources/pom.xml
-          sed "s/@@version@@/${{ github.event.inputs.newMasterVersion }}/" documentation/README_TEMPLATE.md > README.md
+          cat documentation/README_TEMPLATE.md > README.md
+          sed -i "s/@@version@@/${{ github.event.inputs.newMasterVersion }}/" README.md
           mvn $MAVEN_CLI_OPTS versions:commit
       - name: Commit changes after the new version
         uses: stefanzweifel/git-auto-commit-action@v4
