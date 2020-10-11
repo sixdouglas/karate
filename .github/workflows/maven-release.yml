@@ -46,17 +46,8 @@
             cat documentation/README_TEMPLATE.md > README.md
             sed -i "s/@@version@@/${{ github.event.inputs.newMasterVersion }}/" README.md
             mvn $MAVEN_CLI_OPTS versions:commit
-            git status
-        - name: Commit changes after the new version
-          uses: stefanzweifel/git-auto-commit-action@v4
-          with:
-            commit_message: Apply Maven Release automatic changes for version ${{ github.event.inputs.newMasterVersion }}
-            file_pattern: --all
-            commit_user_name: ptrthomas
-            commit_user_email: peter_thomas@intuit.com
-            commit_author: Peter Thomas <peter_thomas@intuit.com>
         - name: Main packages Maven deploy
-          run: mvn $MAVEN_CLI_OPTS clean package -P pre-release,release -Dgpg.skip
+          run: mvn $MAVEN_CLI_OPTS clean install -P pre-release,release -Dgpg.skip
         - name: Netty deploy
           run: |
             cd karate-netty
@@ -67,6 +58,14 @@
             cd karate-robot
             mvn install -P fatjar
             cd ..
+        - name: Commit changes after the new version
+          uses: stefanzweifel/git-auto-commit-action@v4
+          with:
+            commit_message: Apply Maven Release automatic changes for version ${{ github.event.inputs.newMasterVersion }}
+            file_pattern: --all
+            commit_user_name: ptrthomas
+            commit_user_email: peter_thomas@intuit.com
+            commit_author: Peter Thomas <peter_thomas@intuit.com>
         - name: Create Release
           id: create_release
           uses: actions/create-release@v1
