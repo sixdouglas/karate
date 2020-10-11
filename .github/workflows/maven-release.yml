@@ -82,7 +82,7 @@
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-            asset_path: ./karate-netty/karate-netty-${{ github.event.inputs.newMasterVersion }}.zip
+            asset_path: ./karate-netty/target/karate-netty-${{ github.event.inputs.newMasterVersion }}.zip
             asset_name: karate-${{ github.event.inputs.newMasterVersion }}.zip
         - name: Upload Robot Release Asset
           id: upload-robot-release-asset
@@ -91,5 +91,5 @@
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-            asset_path: ./karate-robot/karate-robot-${{ github.event.inputs.newMasterVersion }}.jar
+            asset_path: ./karate-robot/target/karate-robot-${{ github.event.inputs.newMasterVersion }}.jar
             asset_name: karate-robot-${{ github.event.inputs.newMasterVersion }}.jar
