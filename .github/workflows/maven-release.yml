@@ -111,6 +111,13 @@ jobs:
           asset_name: karate-robot-${{ github.event.inputs.newMasterVersion }}.jar
           asset_content_type: application/java-archive
       -
+        name: Prepare Docker Build
+        run: |
+          mkdir -p karate-docker/karate-chrome/target/repository
+          mvn -Dmaven.repo.local=karate-docker/karate-chrome/target/repository clean install -DskipTests -P pre-release -Djavacpp.platform=linux-x86_64
+          mvn -Dmaven.repo.local=karate-docker/karate-chrome/target/repository -f karate-netty/pom.xml install -DskipTests -P fatjar
+          cp karate-netty/target/karate-${{ github.event.inputs.newMasterVersion }}.jar karate-docker/karate-chrome/target/karate.jar
+      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       -
