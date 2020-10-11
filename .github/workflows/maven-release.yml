@@ -61,7 +61,7 @@
         - name: Commit changes after the new version
           uses: stefanzweifel/git-auto-commit-action@v4
           with:
-            commit_message: Apply Maven Release automatic changes for version ${{ github.event.inputs.newMasterVersion }}
+            commit_message: Release ${{ github.event.inputs.newMasterVersion }}
             commit_user_name: ptrthomas
             commit_user_email: peter_thomas@intuit.com
             commit_author: Peter Thomas <peter_thomas@intuit.com>
@@ -82,7 +82,7 @@
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-            asset_path: ./karate-netty/target/karate-netty-${{ github.event.inputs.newMasterVersion }}.zip
+            asset_path: ./karate-netty/target/karate-${{ github.event.inputs.newMasterVersion }}.zip
             asset_name: karate-${{ github.event.inputs.newMasterVersion }}.zip
             asset_content_type: application/zip
         - name: Upload Robot Release Asset
