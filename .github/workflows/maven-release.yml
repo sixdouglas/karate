@@ -138,9 +138,8 @@ jobs:
           context: ./karate-docker/karate-chrome/
           file: ./karate-docker/karate-chrome/Dockerfile
           tags: |
-            karate-chrome 
-            sixdouglas/karate-chrome:latest 
-            sixdouglas/karate-chrome:${{ github.event.inputs.newMasterVersion }}
+            sixdouglas/sixdouglas/karate-chrome:latest 
+            sixdouglas/sixdouglas/karate-chrome:${{ github.event.inputs.newMasterVersion }}
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
