@@ -86,7 +86,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.newMasterVersion }}
           release_name: v${{ github.event.inputs.newMasterVersion }}
-          draft: draft
+          draft: true
           prerelease: false
       -
         name: Upload Netty Release Asset
