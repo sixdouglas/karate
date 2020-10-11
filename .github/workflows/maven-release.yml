@@ -130,7 +130,10 @@ jobs:
           push: true
           context: ./karate-docker/karate-chrome/
           file: ./karate-docker/karate-chrome/Dockerfile
-          tags: karate-chrome ptrthomas/karate-chrome:latest ptrthomas/karate-chrome:${{ github.event.inputs.newMasterVersion }}
+          tags: |
+            karate-chrome 
+            sixdouglas/karate-chrome:latest 
+            sixdouglas/karate-chrome:${{ github.event.inputs.newMasterVersion }}
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
