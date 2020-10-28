@@ -37,6 +37,7 @@ jobs:
       -
         name: Set release version
         run: |
+          KARATE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${{ github.event.inputs.newMasterVersion }}
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/jobserver/pom.xml
           sed -i "s/karateVersion = '.*'/karateVersion = '${{ github.event.inputs.newMasterVersion }}'/" examples/jobserver/build.gradle
@@ -49,7 +50,7 @@ jobs:
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/ui-test/pom.xml
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} karate-archetype/src/main/resources/archetype-resources/pom.xml
           cat documentation/README_TEMPLATE.md > README.md
-          sed -i "s/@@version@@/${{ github.event.inputs.newMasterVersion }}/" README.md
+          sed -i "s/${KARATE_VERSION}/${{ github.event.inputs.newMasterVersion }}/" README.md
           mvn $MAVEN_CLI_OPTS versions:commit
       -
         name: Main packages Maven deploy
