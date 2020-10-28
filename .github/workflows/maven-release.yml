@@ -49,7 +49,6 @@ jobs:
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/robot-test/pom.xml
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/ui-test/pom.xml
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} karate-archetype/src/main/resources/archetype-resources/pom.xml
-          cat documentation/README_TEMPLATE.md > README.md
           sed -i "s/${KARATE_VERSION}/${{ github.event.inputs.newMasterVersion }}/" README.md
           mvn $MAVEN_CLI_OPTS versions:commit
       -
@@ -85,7 +84,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.inputs.newMasterVersion }}
+          tag_name: v${{ github.event.inputs.newMasterVersion }}
           release_name: v${{ github.event.inputs.newMasterVersion }}
           draft: true
           prerelease: false
