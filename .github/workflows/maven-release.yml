@@ -38,7 +38,7 @@ jobs:
         name: Set release version
         run: |
           KARATE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${{ github.event.inputs.newMasterVersion }}
+          mvn ${{ env.MAVEN_CLI_OPTS }} versions:set -DnewVersion=${{ github.event.inputs.newMasterVersion }}
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0"  -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/jobserver/pom.xml
           sed -i "s/karateVersion = '.*'/karateVersion = '${{ github.event.inputs.newMasterVersion }}'/" examples/jobserver/build.gradle
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/gatling/pom.xml
@@ -50,42 +50,48 @@ jobs:
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} examples/ui-test/pom.xml
           xmlstarlet ed -L -N N="http://maven.apache.org/POM/4.0.0" -u "/N:project//N:properties/N:karate.version" -v ${{ github.event.inputs.newMasterVersion }} karate-archetype/src/main/resources/archetype-resources/pom.xml
           sed -i "s/${KARATE_VERSION}/${{ github.event.inputs.newMasterVersion }}/" README.md
-          mvn $MAVEN_CLI_OPTS versions:commit
+          mvn ${{ env.MAVEN_CLI_OPTS }} versions:commit
       -
         name: Main packages Maven deploy
         run: |
-          mvn $MAVEN_CLI_OPTS clean install -P pre-release,release -Dgpg.skip
+          mvn ${{ env.MAVEN_CLI_OPTS }} clean install -P pre-release,release -Dgpg.skip
           mvn -f examples/jobserver/pom.xml test-compile exec:java -Dexec.mainClass=common.Main -Dexec.classpathScope=test
           mvn -f examples/gatling/pom.xml test
       -
         name: Netty deploy
         run: |
           cd karate-netty
-          mvn install -P fatjar
+          mvn ${{ env.MAVEN_CLI_OPTS }} install -P fatjar
           cd ..
       -
         name: Robot deploy
         run: |
           cd karate-robot
-          mvn install -P fatjar
+          mvn ${{ env.MAVEN_CLI_OPTS }} install -P fatjar
           cd ..
       -
         name: Commit changes after the new version
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v4.7.2
         with:
           commit_message: Release ${{ github.event.inputs.newMasterVersion }}
           commit_user_name: ptrthomas
           commit_user_email: peter_thomas@intuit.com
           commit_author: Peter Thomas <peter_thomas@intuit.com>
       -
+        name: Get new commit SHA
+        run: |
+          NEW_COMMIT_ID=$(git rev-parse --verify HEAD)
+          echo "::set-env name=NEW_COMMIT_ID::$NEW_COMMIT_ID"
+      -
         name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v1.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ github.event.inputs.newMasterVersion }}
           release_name: v${{ github.event.inputs.newMasterVersion }}
+          commitish: ${{ env.NEW_COMMIT_ID }}
           draft: true
           prerelease: false
       -
@@ -114,8 +120,8 @@ jobs:
         name: Prepare Docker Build
         run: |
           mkdir -p karate-docker/karate-chrome/target/repository
-          mvn -Dmaven.repo.local=karate-docker/karate-chrome/target/repository clean install -DskipTests -P pre-release -Djavacpp.platform=linux-x86_64
-          mvn -Dmaven.repo.local=karate-docker/karate-chrome/target/repository -f karate-netty/pom.xml install -DskipTests -P fatjar
+          mvn  ${{ env.MAVEN_CLI_OPTS }} -Dmaven.repo.local=karate-docker/karate-chrome/target/repository clean install -DskipTests -P pre-release -Djavacpp.platform=linux-x86_64
+          mvn  ${{ env.MAVEN_CLI_OPTS }} -Dmaven.repo.local=karate-docker/karate-chrome/target/repository -f karate-netty/pom.xml install -DskipTests -P fatjar
           cp karate-netty/target/karate-${{ github.event.inputs.newMasterVersion }}.jar karate-docker/karate-chrome/target/karate.jar
       -
         name: Set up QEMU
