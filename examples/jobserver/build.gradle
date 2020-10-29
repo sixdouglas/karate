@@ -3,7 +3,7 @@ plugins {
 }
 
 ext {
-    karateVersion = '1.0.12'
+    karateVersion = '1.0.13'
 }
 
 dependencies {
